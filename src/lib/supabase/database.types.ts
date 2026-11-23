@@ -3,7 +3,25 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type Database = {
   
-  "public": {
+  "graphql_public": {
+          Tables: {
+            [_ in never]: never
+          }
+          Views: {
+            [_ in never]: never
+          }
+          Functions: {
+            "graphql":
+{ Args: { "extensions"?: Json,"operationName"?: string,"query"?: string,"variables"?: Json }; Returns: Json
+                           }
+          }
+          Enums: {
+            [_ in never]: never
+          }
+          CompositeTypes: {
+            [_ in never]: never
+          }
+        },"public": {
           Tables: {
             "alerts": {
                   Row: {
@@ -710,11 +728,21 @@ isOneToOne: false
             "can_view_build":
 { Args: { "p_build_id": string }; Returns: boolean
                            },
+"category_brands":
+{ Args: { "p_category": string }; Returns: {
+              "name": string,"product_count": number,"slug": string
+            }[]
+                           },
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "owns_build":
 { Args: { "p_build_id": string }; Returns: boolean
+                           },
+"search_products":
+{ Args: { "p_brands"?: (string)[],"p_category"?: string,"p_in_stock"?: boolean,"p_limit"?: number,"p_max_price"?: number,"p_min_price"?: number,"p_offset"?: number,"p_query"?: string,"p_region": string,"p_retailer"?: string,"p_sort"?: string,"p_spec_any"?: Json,"p_spec_ranges"?: Json,"p_specs"?: Json }; Returns: {
+              "average_rating": number,"brand_name": string,"brand_slug": string,"category_slug": string,"currency_code": string,"default_variant_id": string,"id": string,"image_urls": (string)[],"in_stock_count": number,"min_price": number,"name": string,"offer_count": number,"performance_score": number,"power_draw_w": number,"rank": number,"release_date": string,"review_count": number,"slug": string,"specs": Json,"total_count": number
+            }[]
                            }
           }
           Enums: {
@@ -832,7 +860,11 @@ export type CompositeTypes<
   : never
 
 export const Constants = {
-  "public": {
+  "graphql_public": {
+          Enums: {
+            
+          }
+        },"public": {
           Enums: {
             "alert_type": ["price_drop", "back_in_stock"],"build_visibility": ["private", "unlisted", "public"],"listing_type": ["retail", "marketplace"],"product_status": ["draft", "published", "archived"],"rule_severity": ["error", "warning", "info"],"stock_status": ["in_stock", "low_stock", "out_of_stock", "preorder", "backorder", "unknown"],"submission_kind": ["new_product", "correction", "report"],"submission_status": ["pending", "approved", "rejected"],"use_case": ["gaming", "productivity", "streaming", "content_creation", "workstation", "home_office"],"user_role": ["user", "admin"]
           }
