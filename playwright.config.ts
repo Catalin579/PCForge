@@ -10,6 +10,10 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
+    // Use a preinstalled Chromium instead of the bundled one when provided.
+    launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+      : undefined,
   },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },

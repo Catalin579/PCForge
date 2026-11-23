@@ -16,7 +16,15 @@ import path from "node:path";
 
 import { specSchemas, type CategorySlug } from "../src/lib/catalog/specs";
 import * as ref from "../supabase/seed/data/reference";
-import { cases, caseFans, coolers, headsets, keyboards, mice, monitors } from "../supabase/seed/data/products-chassis";
+import {
+  cases,
+  caseFans,
+  coolers,
+  headsets,
+  keyboards,
+  mice,
+  monitors,
+} from "../supabase/seed/data/products-chassis";
 import { cpus, memory, motherboards } from "../supabase/seed/data/products-platform";
 import { gpus, psus, storage } from "../supabase/seed/data/products-power";
 import type { SeedProduct } from "../supabase/seed/types";
@@ -58,7 +66,12 @@ function sql(value: unknown): string {
 
 type Row = Record<string, unknown>;
 
-function upsert(table: string, rows: Row[], conflict: string[], opts: { update?: boolean } = {}): string {
+function upsert(
+  table: string,
+  rows: Row[],
+  conflict: string[],
+  opts: { update?: boolean } = {},
+): string {
   if (rows.length === 0) return "";
   const cols = Object.keys(rows[0]!);
   const values = rows.map((r) => `  (${cols.map((c) => sql(r[c])).join(", ")})`).join(",\n");
@@ -100,8 +113,19 @@ function stockFor(key: string): string {
 // ---------------------------------------------------------------------------
 
 export const allProducts: SeedProduct[] = [
-  ...cpus, ...motherboards, ...memory, ...gpus, ...storage, ...psus,
-  ...cases, ...coolers, ...caseFans, ...monitors, ...keyboards, ...mice, ...headsets,
+  ...cpus,
+  ...motherboards,
+  ...memory,
+  ...gpus,
+  ...storage,
+  ...psus,
+  ...cases,
+  ...coolers,
+  ...caseFans,
+  ...monitors,
+  ...keyboards,
+  ...mice,
+  ...headsets,
 ] as SeedProduct[];
 
 export function validateProducts(products: SeedProduct[]): void {
@@ -109,7 +133,8 @@ export function validateProducts(products: SeedProduct[]): void {
   for (const p of products) {
     if (slugs.has(p.slug)) throw new Error(`Duplicate product slug: ${p.slug}`);
     slugs.add(p.slug);
-    if (!ref.brands.some(([slug]) => slug === p.brand)) throw new Error(`${p.slug}: unknown brand ${p.brand}`);
+    if (!ref.brands.some(([slug]) => slug === p.brand))
+      throw new Error(`${p.slug}: unknown brand ${p.brand}`);
     const schema = specSchemas[p.category as CategorySlug];
     const variants = p.variants ?? [{ key: "default", label: "" }];
     for (const v of variants) {
@@ -137,49 +162,160 @@ export function buildSeedSql(): string {
   );
 
   // Reference data ----------------------------------------------------------
-  out.push(upsert("currencies", ref.currencies.map((c) => ({ code: c.code, name: c.name, symbol: c.symbol, minor_units: c.minorUnits })), ["code"]));
+  out.push(
+    upsert(
+      "currencies",
+      ref.currencies.map((c) => ({
+        code: c.code,
+        name: c.name,
+        symbol: c.symbol,
+        minor_units: c.minorUnits,
+      })),
+      ["code"],
+    ),
+  );
 
-  out.push(upsert("exchange_rates", ref.exchangeRates.map((r) => ({
-    base_currency: r.base, quote_currency: r.quote, rate: r.rate, source: r.source, valid_at: r.validAt,
-  })), ["base_currency", "quote_currency", "valid_at"]));
+  out.push(
+    upsert(
+      "exchange_rates",
+      ref.exchangeRates.map((r) => ({
+        base_currency: r.base,
+        quote_currency: r.quote,
+        rate: r.rate,
+        source: r.source,
+        valid_at: r.validAt,
+      })),
+      ["base_currency", "quote_currency", "valid_at"],
+    ),
+  );
 
-  out.push(upsert("regions", ref.regions.map((r) => ({
-    code: r.code, name: r.name, default_currency: r.defaultCurrency, default_locale: r.defaultLocale,
-    supported_locales: [...r.supportedLocales], prices_include_tax: true, is_active: true, sort_order: r.sortOrder,
-  })), ["code"]));
+  out.push(
+    upsert(
+      "regions",
+      ref.regions.map((r) => ({
+        code: r.code,
+        name: r.name,
+        default_currency: r.defaultCurrency,
+        default_locale: r.defaultLocale,
+        supported_locales: [...r.supportedLocales],
+        prices_include_tax: true,
+        is_active: true,
+        sort_order: r.sortOrder,
+      })),
+      ["code"],
+    ),
+  );
 
-  out.push(upsert("region_currencies", ref.regions.flatMap((r) =>
-    [r.defaultCurrency, ...r.extraCurrencies].map((c) => ({ region_code: r.code, currency_code: c }))), ["region_code", "currency_code"], { update: false }));
+  out.push(
+    upsert(
+      "region_currencies",
+      ref.regions.flatMap((r) =>
+        [r.defaultCurrency, ...r.extraCurrencies].map((c) => ({
+          region_code: r.code,
+          currency_code: c,
+        })),
+      ),
+      ["region_code", "currency_code"],
+      { update: false },
+    ),
+  );
 
-  out.push(upsert("categories", ref.categories.map((c, i) => ({
-    slug: c.slug, name: c.name, plural_name: c.plural, description: c.description, icon: c.icon,
-    is_core: c.isCore, max_per_build: c.max, sort_order: i + 1,
-  })), ["slug"]));
+  out.push(
+    upsert(
+      "categories",
+      ref.categories.map((c, i) => ({
+        slug: c.slug,
+        name: c.name,
+        plural_name: c.plural,
+        description: c.description,
+        icon: c.icon,
+        is_core: c.isCore,
+        max_per_build: c.max,
+        sort_order: i + 1,
+      })),
+      ["slug"],
+    ),
+  );
 
-  out.push(upsert("tax_rules", ref.taxRules.map((t) => ({
-    id: stableUuid(`tax:${t.region}:${t.validFrom}`), region_code: t.region, category_slug: null,
-    name: t.name, rate: t.rate, valid_from: t.validFrom, valid_to: t.validTo,
-  })), ["id"]));
+  out.push(
+    upsert(
+      "tax_rules",
+      ref.taxRules.map((t) => ({
+        id: stableUuid(`tax:${t.region}:${t.validFrom}`),
+        region_code: t.region,
+        category_slug: null,
+        name: t.name,
+        rate: t.rate,
+        valid_from: t.validFrom,
+        valid_to: t.validTo,
+      })),
+      ["id"],
+    ),
+  );
 
-  out.push(upsert("brands", ref.brands.map(([slug, name, url]) => ({
-    id: stableUuid(`brand:${slug}`), slug, name, website_url: url,
-  })), ["id"]));
+  out.push(
+    upsert(
+      "brands",
+      ref.brands.map(([slug, name, url]) => ({
+        id: stableUuid(`brand:${slug}`),
+        slug,
+        name,
+        website_url: url,
+      })),
+      ["id"],
+    ),
+  );
 
-  out.push(upsert("retailers", ref.retailers.map((r) => ({
-    id: stableUuid(`retailer:${r.slug}`), slug: r.slug, name: r.name, website_url: r.websiteUrl,
-    search_url_template: r.searchUrlTemplate, is_marketplace: r.isMarketplace, is_active: true,
-  })), ["id"]));
+  out.push(
+    upsert(
+      "retailers",
+      ref.retailers.map((r) => ({
+        id: stableUuid(`retailer:${r.slug}`),
+        slug: r.slug,
+        name: r.name,
+        website_url: r.websiteUrl,
+        search_url_template: r.searchUrlTemplate,
+        is_marketplace: r.isMarketplace,
+        is_active: true,
+      })),
+      ["id"],
+    ),
+  );
 
-  out.push(upsert("retailer_regions", ref.retailers.flatMap((r) => r.regions.map((rr) => ({
-    retailer_id: stableUuid(`retailer:${r.slug}`), region_code: rr.region, currency_code: rr.currency,
-    shipping_cost: rr.shipping, free_shipping_over: rr.freeOver,
-    delivery_days_min: rr.days[0], delivery_days_max: rr.days[1], is_active: true,
-  }))), ["retailer_id", "region_code"]));
+  out.push(
+    upsert(
+      "retailer_regions",
+      ref.retailers.flatMap((r) =>
+        r.regions.map((rr) => ({
+          retailer_id: stableUuid(`retailer:${r.slug}`),
+          region_code: rr.region,
+          currency_code: rr.currency,
+          shipping_cost: rr.shipping,
+          free_shipping_over: rr.freeOver,
+          delivery_days_min: rr.days[0],
+          delivery_days_max: rr.days[1],
+          is_active: true,
+        })),
+      ),
+      ["retailer_id", "region_code"],
+    ),
+  );
 
-  out.push(upsert("compatibility_rules", ref.compatibilityRules.map((r) => ({
-    code: r.code, name: r.name, description: r.description, severity: r.severity,
-    categories: [...r.categories], params: r.params, is_active: true,
-  })), ["code"]));
+  out.push(
+    upsert(
+      "compatibility_rules",
+      ref.compatibilityRules.map((r) => ({
+        code: r.code,
+        name: r.name,
+        description: r.description,
+        severity: r.severity,
+        categories: [...r.categories],
+        params: r.params,
+        is_active: true,
+      })),
+      ["code"],
+    ),
+  );
 
   // Catalog -------------------------------------------------------------------
   const productRows: Row[] = [];
@@ -190,25 +326,45 @@ export function buildSeedSql(): string {
   for (const p of allProducts) {
     const productId = stableUuid(`product:${p.slug}`);
     productRows.push({
-      id: productId, slug: p.slug, category_slug: p.category, brand_id: stableUuid(`brand:${p.brand}`),
-      name: p.name, model: p.model, description: p.description, specs: p.specs,
-      power_draw_w: p.powerDrawW, performance_score: p.performanceScore, release_date: p.releaseDate,
+      id: productId,
+      slug: p.slug,
+      category_slug: p.category,
+      brand_id: stableUuid(`brand:${p.brand}`),
+      name: p.name,
+      model: p.model,
+      description: p.description,
+      specs: p.specs,
+      power_draw_w: p.powerDrawW,
+      performance_score: p.performanceScore,
+      release_date: p.releaseDate,
       status: "published",
     });
 
-    const variants = p.variants ?? [{ key: "default", label: null as unknown as string, mpn: p.model }];
-    const defaultIdx = Math.max(0, variants.findIndex((x) => ((x as { priceFactor?: number }).priceFactor ?? 1) === 1));
+    const variants = p.variants ?? [
+      { key: "default", label: null as unknown as string, mpn: p.model },
+    ];
+    const defaultIdx = Math.max(
+      0,
+      variants.findIndex((x) => ((x as { priceFactor?: number }).priceFactor ?? 1) === 1),
+    );
     variants.forEach((v, idx) => {
       const variantId = stableUuid(`variant:${p.slug}:${v.key}`);
       const isDefault = idx === defaultIdx;
       variantRows.push({
-        id: variantId, product_id: productId, sku: `${p.slug}-${v.key}`.toUpperCase(), mpn: v.mpn ?? null,
-        label: v.label || null, specs_override: v.specsOverride ?? {}, is_default: isDefault,
+        id: variantId,
+        product_id: productId,
+        sku: `${p.slug}-${v.key}`.toUpperCase(),
+        mpn: v.mpn ?? null,
+        label: v.label || null,
+        specs_override: v.specsOverride ?? {},
+        is_default: isDefault,
       });
 
       for (const region of ref.regions) {
         const pricing = REGION_PRICE_FACTOR[region.code]!;
-        const retailersHere = ref.retailers.filter((r) => r.regions.some((rr) => rr.region === region.code));
+        const retailersHere = ref.retailers.filter((r) =>
+          r.regions.some((rr) => rr.region === region.code),
+        );
         // Each retailer stocks ~80 % of products; always keep at least two offers.
         const ranked = retailersHere
           .map((r) => ({ r, h: hash01(`carries:${r.slug}:${p.slug}:${v.key}`) }))
@@ -218,7 +374,8 @@ export function buildSeedSql(): string {
         for (const r of carried) {
           const key = `${r.slug}:${p.slug}:${v.key}:${region.code}`;
           const jitter = 1 + (hash01(`price:${key}`) - 0.5) * 0.1; // ±5 %
-          const base = p.referencePriceEur * (v.priceFactor ?? 1) * pricing.factor * r.priceBias * jitter;
+          const base =
+            p.referencePriceEur * (v.priceFactor ?? 1) * pricing.factor * r.priceBias * jitter;
           const price = roundRetailPrice(base, pricing.currency);
           const listingType = hash01(`mkt:${key}`) < r.marketplaceShare ? "marketplace" : "retail";
           const offerId = stableUuid(`offer:${key}:${listingType}`);
@@ -227,13 +384,21 @@ export function buildSeedSql(): string {
           const query = encodeURIComponent(p.name);
 
           offerRows.push({
-            id: offerId, variant_id: variantId, retailer_id: stableUuid(`retailer:${r.slug}`),
-            region_code: region.code, currency_code: pricing.currency, price, price_includes_tax: true,
-            shipping_cost: null, stock_status: stock, listing_type: listingType,
+            id: offerId,
+            variant_id: variantId,
+            retailer_id: stableUuid(`retailer:${r.slug}`),
+            region_code: region.code,
+            currency_code: pricing.currency,
+            price,
+            price_includes_tax: true,
+            shipping_cost: null,
+            stock_status: stock,
+            listing_type: listingType,
             url: r.searchUrlTemplate ? r.searchUrlTemplate.replace("{query}", query) : r.websiteUrl,
             delivery_days_min: listingType === "marketplace" ? rr.days[0] + 2 : rr.days[0],
             delivery_days_max: listingType === "marketplace" ? rr.days[1] + 5 : rr.days[1],
-            is_active: true, last_checked_at: SEED_AS_OF,
+            is_active: true,
+            last_checked_at: SEED_AS_OF,
           });
 
           // History: a gentle downward drift with noise, ending at today's price
@@ -295,7 +460,9 @@ async function main() {
     products: allProducts.length,
     variants: allProducts.reduce((n, p) => n + (p.variants?.length ?? 1), 0),
   };
-  console.log(`Wrote ${path.relative(process.cwd(), target)} (${counts.products} products, ${counts.variants} variants)`);
+  console.log(
+    `Wrote ${path.relative(process.cwd(), target)} (${counts.products} products, ${counts.variants} variants)`,
+  );
 
   if (process.argv.includes("--apply")) {
     const url = process.env.DATABASE_URL;

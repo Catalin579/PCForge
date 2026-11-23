@@ -190,7 +190,9 @@ export const monitorSpecsSchema = z.object({
   refreshRateHz: positiveInt,
   panel: z.enum(["IPS", "VA", "TN", "OLED", "QD-OLED"]),
   responseTimeMs: z.number().positive(),
-  adaptiveSync: z.array(z.enum(["G-SYNC", "G-SYNC Compatible", "FreeSync", "FreeSync Premium", "FreeSync Premium Pro"])),
+  adaptiveSync: z.array(
+    z.enum(["G-SYNC", "G-SYNC Compatible", "FreeSync", "FreeSync Premium", "FreeSync Premium Pro"]),
+  ),
   hdr: z.string().optional(),
   inputs: z.array(z.string()).default([]),
 });
