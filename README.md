@@ -2,7 +2,7 @@
 
 PCForge helps people research, build, compare and buy complete PC setups using the components, retailers, prices and taxes of **their own region**. Pick a market and currency, add parts category by category, and the app checks compatibility and totals the build from real regional offers.
 
-> **Status:** step 1 of the MVP (foundation) is done: project scaffold, database schema with Row Level Security, and seed data for Romania and Germany. The compatibility engine, pricing service, public pages, accounts and admin panel come next. See [CLAUDE.md](./CLAUDE.md#roadmap).
+> **Status:** steps 1 and 2 of the MVP are done: project scaffold, database schema with Row Level Security, seed data for Romania and Germany, the compatibility engine and the regional pricing service. Public pages, accounts and the admin panel come next. See [CLAUDE.md](./CLAUDE.md#roadmap).
 
 ## Tech stack
 
@@ -139,7 +139,7 @@ To change the catalog, edit `supabase/seed/data/*.ts` and run `pnpm db:seed:gene
 
 ## Testing
 
-- `pnpm test`: unit tests (spec schemas, seed generator; the compatibility engine lands in step 2)
+- `pnpm test`: unit tests for the compatibility engine (every rule, passing and failing), power and performance estimates, money, exchange rates, VAT, offer ranking and build pricing, plus spec schemas and the seed generator
 - `pnpm db:verify`: migrations, seed and RLS tests against a throwaway database
 - `pnpm build && pnpm test:e2e`: Playwright on desktop Chrome and a mobile viewport. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to use an already-installed Chromium.
 

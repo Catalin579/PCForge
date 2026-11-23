@@ -42,8 +42,13 @@ src/
     utils.ts                cn() helper
     catalog/specs.ts        Zod spec schemas per category (source of truth for specs JSON)
     supabase/               browser, server and middleware clients; generated database.types.ts
-    compatibility/          (step 2) rule engine
-    pricing/                (step 2) currency conversion, VAT, best-offer selection
+    compatibility/          rule engine: rule-definitions.ts (codes + defaults), rules.ts
+                            (implementations), engine.ts (evaluateBuild), power.ts,
+                            performance.ts, from-row.ts (DB row → typed component)
+    pricing/                money.ts (integer minor units), exchange.ts, tax.ts,
+                            offers.ts (quote + rank offers), build-pricing.ts (priceBuild)
+    builds/                 evaluate.ts: loads a build's data from Supabase and runs
+                            compatibility + pricing server-side; schema.ts (Zod input)
   middleware.ts
 supabase/
   config.toml               local Supabase config
@@ -72,12 +77,22 @@ e2e/                        Playwright tests
 
 ## Compatibility rules
 
-Rule codes are defined in `compatibility_rules` (seeded from `supabase/seed/data/reference.ts`) and implemented in `src/lib/compatibility`. The table controls whether a rule is active, its severity (`error` blocks "compatible", `warning` and `info` don't) and tunable params (e.g. `psu.headroom.headroomRatio`). Adding a rule means adding the code to both places plus tests.
+Rule codes and defaults live in `src/lib/compatibility/rule-definitions.ts`; the `compatibility_rules` table is seeded from it, and `rules.ts` implements each code (a test fails if the two drift). At runtime, database rows override the defaults: whether a rule is active, its severity (`error` makes the build "incompatible", `warning` and `info` don't) and tunable params (e.g. `psu.headroom.headroomRatio`, `gpu_case.length.tightClearanceMm`).
+
+A finding may carry its own severity when one rule covers cases of different weight (an adapter-able 12V-2x6 gap is a warning, missing 8-pin cables an error). If an admin changes a rule's severity, that choice applies to every finding of the rule.
+
+Build status: `empty` → `incompatible` (any error) → `incomplete` (missing core parts, a cooler for a CPU without one, or a GPU for a CPU without integrated graphics) → `warnings` → `compatible`.
+
+Adding a rule: add it to rule-definitions.ts, implement it in rules.ts, add passing and failing tests in engine.test.ts, then `pnpm db:seed:generate`.
+
+## Pricing
+
+All money is `{ amount: integer minor units, currency }`. Parse database `numeric` values with `toMinor`/`money` (string-safe), never `parseFloat` arithmetic. `quoteOffer` makes a price tax-inclusive (VAT from the dated `tax_rules`, category-specific rules first), converts it with the latest exchange rate valid at the pricing moment (direct, inverse or cross rate) and adds standalone shipping. `rankQuotes` orders offers: buyable now, then lowest price + shipping, then fastest delivery, then retail before marketplace. `priceBuild` uses the user's selected offer when still valid, charges shipping once per shipment (per retailer, or per marketplace listing) with free-shipping thresholds, and reports VAT included, unavailable and unpriced items. Always pass `at` explicitly so results are reproducible.
 
 ## Roadmap
 
 1. **Foundation** (done): scaffold, schema + RLS, seed data for RO and DE, README, CLAUDE.md, CI.
-2. **Core services:** compatibility engine (all rules above, with errors, warnings and suggestions; power draw and PSU recommendation; bottleneck and performance tier) and pricing service (currency conversion, VAT, best offer per region, shipping). Thorough unit tests.
+2. **Core services** (done): compatibility engine (all rules above, with errors, warnings and suggestions; power draw and PSU recommendation; bottleneck and performance tier) and pricing service (currency conversion, VAT, best offer per region, shipping). Thorough unit tests.
 3. **Public app:** region detection with manual override; catalog with search and filters; product pages with offers and price history; interactive builder with live compatibility and totals; Supabase Auth (email + OAuth); saved builds, duplicate, compare and share links; Playwright tests for the main flows.
 4. **Admin and launch:** admin CRUD for products, variants, retailers, offers, regions, tax rules and compatibility rules; CSV/JSON bulk import; submissions review; basic analytics; deployment to Vercel + Supabase.
 

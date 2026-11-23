@@ -1,0 +1,217 @@
+/**
+ * Default definitions of every compatibility rule the engine implements.
+ *
+ * The `compatibility_rules` table is seeded from this list. At runtime the
+ * engine merges database rows over these defaults, so admins can disable a
+ * rule, change its severity or tune its params without a deploy. Adding a
+ * rule means adding it here, implementing it in rules.ts and testing it.
+ */
+export const RULE_DEFINITIONS = [
+  {
+    code: "cpu_motherboard.socket",
+    name: "CPU socket matches motherboard",
+    severity: "error",
+    categories: ["cpu", "motherboard"],
+    description: "The CPU must use the same socket as the motherboard.",
+    params: {},
+  },
+  {
+    code: "memory_motherboard.type",
+    name: "Memory type matches motherboard",
+    severity: "error",
+    categories: ["memory", "motherboard"],
+    description:
+      "DDR4 and DDR5 are not interchangeable. The memory must match the motherboard's memory type.",
+    params: {},
+  },
+  {
+    code: "memory_cpu.type",
+    name: "CPU supports memory type",
+    severity: "error",
+    categories: ["memory", "cpu"],
+    description: "The CPU's memory controller must support the selected memory type.",
+    params: {},
+  },
+  {
+    code: "memory_motherboard.slots",
+    name: "Enough memory slots",
+    severity: "error",
+    categories: ["memory", "motherboard"],
+    description: "The total number of memory modules cannot exceed the motherboard's slots.",
+    params: {},
+  },
+  {
+    code: "memory_motherboard.capacity",
+    name: "Memory within motherboard maximum",
+    severity: "error",
+    categories: ["memory", "motherboard"],
+    description: "Total memory cannot exceed what the motherboard supports.",
+    params: {},
+  },
+  {
+    code: "memory.speed",
+    name: "Memory speed supported",
+    severity: "warning",
+    categories: ["memory", "motherboard", "cpu"],
+    description:
+      "Memory faster than the CPU or motherboard supports will run at a lower speed unless overclocked.",
+    params: {},
+  },
+  {
+    code: "memory.mixed_kits",
+    name: "Matching memory kits",
+    severity: "warning",
+    categories: ["memory"],
+    description: "Mixing different memory kits can be unstable. Prefer a single kit.",
+    params: {},
+  },
+  {
+    code: "motherboard_case.form_factor",
+    name: "Motherboard fits case",
+    severity: "error",
+    categories: ["motherboard", "case"],
+    description: "The case must support the motherboard's form factor.",
+    params: {},
+  },
+  {
+    code: "gpu_case.length",
+    name: "Graphics card fits case",
+    severity: "error",
+    categories: ["gpu", "case"],
+    description: "The graphics card must be shorter than the case's maximum GPU length.",
+    params: { tightClearanceMm: 10 },
+  },
+  {
+    code: "cooler_cpu.socket",
+    name: "Cooler supports CPU socket",
+    severity: "error",
+    categories: ["cpu-cooler", "cpu"],
+    description: "The cooler must ship with (or offer) a mounting kit for the CPU socket.",
+    params: {},
+  },
+  {
+    code: "cooler_cpu.tdp",
+    name: "Cooler handles CPU heat",
+    severity: "warning",
+    categories: ["cpu-cooler", "cpu"],
+    description: "The cooler's rated capacity should cover the CPU's sustained power.",
+    params: {},
+  },
+  {
+    code: "cooler_case.height",
+    name: "Air cooler fits case",
+    severity: "error",
+    categories: ["cpu-cooler", "case"],
+    description: "An air cooler must be shorter than the case's maximum CPU cooler height.",
+    params: {},
+  },
+  {
+    code: "cooler_case.radiator",
+    name: "Radiator fits case",
+    severity: "error",
+    categories: ["cpu-cooler", "case"],
+    description:
+      "A liquid cooler's radiator size must be supported by a mounting position in the case.",
+    params: {},
+  },
+  {
+    code: "cpu.cooler_required",
+    name: "CPU has a cooler",
+    severity: "warning",
+    categories: ["cpu", "cpu-cooler"],
+    description: "This CPU does not include a cooler, so the build needs one.",
+    params: {},
+  },
+  {
+    code: "cpu.display_output",
+    name: "Display output available",
+    severity: "error",
+    categories: ["cpu", "gpu"],
+    description: "Without a graphics card, the CPU needs integrated graphics to show a picture.",
+    params: {},
+  },
+  {
+    code: "psu.capacity",
+    name: "Power supply is strong enough",
+    severity: "error",
+    categories: ["psu"],
+    description: "The power supply must deliver more than the system's estimated peak draw.",
+    params: {},
+  },
+  {
+    code: "psu.headroom",
+    name: "Power supply headroom",
+    severity: "warning",
+    categories: ["psu", "gpu"],
+    description:
+      "Leave headroom for transient spikes and efficiency. Meets the GPU maker's recommendation and a margin above peak draw.",
+    params: { headroomRatio: 0.3 },
+  },
+  {
+    code: "psu_gpu.connectors",
+    name: "Power supply has GPU connectors",
+    severity: "warning",
+    categories: ["psu", "gpu"],
+    description:
+      "The power supply should have the graphics card's power connectors natively. Adapters work but are not ideal.",
+    params: {},
+  },
+  {
+    code: "psu_motherboard.eps",
+    name: "Enough CPU power connectors",
+    severity: "warning",
+    categories: ["psu", "motherboard"],
+    description: "The power supply should provide every 8-pin EPS connector the motherboard has.",
+    params: {},
+  },
+  {
+    code: "psu_case.form_factor",
+    name: "Power supply fits case",
+    severity: "error",
+    categories: ["psu", "case"],
+    description: "The case must accept the power supply's form factor and length.",
+    params: {},
+  },
+  {
+    code: "storage_motherboard.m2_slots",
+    name: "Enough M.2 slots",
+    severity: "error",
+    categories: ["storage", "motherboard"],
+    description: "Each M.2 drive needs a free compatible M.2 slot.",
+    params: {},
+  },
+  {
+    code: "storage_motherboard.m2_speed",
+    name: "M.2 slot runs drive at full speed",
+    severity: "info",
+    categories: ["storage", "motherboard"],
+    description: "A drive in a slower slot works but at the slot's speed.",
+    params: {},
+  },
+  {
+    code: "storage_motherboard.sata_ports",
+    name: "Enough SATA ports",
+    severity: "error",
+    categories: ["storage", "motherboard"],
+    description: "Each SATA drive needs a SATA port on the motherboard.",
+    params: {},
+  },
+  {
+    code: "storage_case.bays",
+    name: "Enough drive bays",
+    severity: "warning",
+    categories: ["storage", "case"],
+    description: '2.5" and 3.5" drives need mounting bays in the case.',
+    params: {},
+  },
+  {
+    code: "build.required_components",
+    name: "Build is complete",
+    severity: "info",
+    categories: [],
+    description: "A working PC needs a CPU, motherboard, memory, storage, power supply and case.",
+    params: {},
+  },
+] as const;
+
+export type RuleCode = (typeof RULE_DEFINITIONS)[number]["code"];
