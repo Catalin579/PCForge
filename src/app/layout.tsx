@@ -2,7 +2,13 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { Providers } from "@/components/providers";
+import { RegionNotice } from "@/components/region/region-notice";
+import { RegionProvider } from "@/components/region/region-provider";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { SetupRequired } from "@/components/setup-required";
+import { isSupabaseConfigured } from "@/lib/env";
+import { getActiveRegions, getCurrentUser, getRegion } from "@/lib/region/server";
 
 import "./globals.css";
 
@@ -23,11 +29,16 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const configured = isSupabaseConfigured();
+  const [region, regions, user] = configured
+    ? await Promise.all([getRegion(), getActiveRegions(), getCurrentUser()])
+    : [null, [], null];
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={region?.locale.split("-")[0] ?? "en"} suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground min-h-dvh antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground flex min-h-dvh flex-col antialiased`}
       >
         <Providers>
           <a
@@ -36,8 +47,28 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           >
             Skip to content
           </a>
-          <SiteHeader />
-          <main id="main">{children}</main>
+          {region ? (
+            <RegionProvider
+              value={{
+                regionCode: region.region.code,
+                regionName: region.region.name,
+                currency: region.currency,
+                locale: region.locale,
+                regions,
+              }}
+            >
+              <SiteHeader email={user?.email ?? null} />
+              {region.source !== "cookie" && region.source !== "profile" && <RegionNotice />}
+              <main id="main" className="flex-1">
+                {children}
+              </main>
+              <SiteFooter />
+            </RegionProvider>
+          ) : (
+            <main id="main" className="flex-1">
+              <SetupRequired />
+            </main>
+          )}
         </Providers>
       </body>
     </html>
