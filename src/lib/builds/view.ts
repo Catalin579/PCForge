@@ -26,7 +26,9 @@ export async function buildView(
   const evaluation = await evaluateBuildForRegion(supabase, input);
   const variantIds = [...new Set(input.items.map((i) => i.variantId))];
   const retailerIds = [
-    ...new Set(evaluation.price.lines.flatMap((l) => (l.quote ? [l.quote.offer.retailerId] : []))),
+    ...new Set(
+      Object.values(evaluation.offersByVariant).flatMap((qs) => qs.map((q) => q.offer.retailerId)),
+    ),
   ];
 
   const [variants, retailers] = await Promise.all([
@@ -55,10 +57,8 @@ export async function buildView(
   for (const r of retailers.data ?? []) retailerMap[r.id] = { name: r.name, slug: r.slug };
 
   const offerLinks: BuildView["offerLinks"] = {};
-  for (const line of evaluation.price.lines) {
-    for (const q of [line.quote, line.cheaperAlternative]) {
-      if (q) offerLinks[q.offer.id] = safeExternalUrl(q.offer.url);
-    }
+  for (const quotes of Object.values(evaluation.offersByVariant)) {
+    for (const q of quotes) offerLinks[q.offer.id] = safeExternalUrl(q.offer.url);
   }
 
   return { ...evaluation, products, retailers: retailerMap, offerLinks };

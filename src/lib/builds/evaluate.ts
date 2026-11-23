@@ -8,7 +8,15 @@ import {
   type CompatibilityReport,
   type RuleConfig,
 } from "@/lib/compatibility";
-import { priceBuild, type BuildPrice, type OfferRow, type PricingContext } from "@/lib/pricing";
+import {
+  priceBuild,
+  quoteOffer,
+  rankQuotes,
+  type BuildPrice,
+  type OfferQuote,
+  type OfferRow,
+  type PricingContext,
+} from "@/lib/pricing";
 import { type Database } from "@/lib/supabase/database.types";
 
 import { evaluateBuildInputSchema, type EvaluateBuildInput } from "./schema";
@@ -31,6 +39,8 @@ export type BuildEvaluation = {
   currency: string;
   compatibility: CompatibilityReport;
   price: BuildPrice;
+  /** Every offer for each variant in the region, best first, for offer pickers. */
+  offersByVariant: Record<string, OfferQuote[]>;
 };
 
 /**
@@ -178,9 +188,22 @@ export async function evaluateBuildForRegion(
     isActive: o.is_active,
   }));
 
+  const includeMarketplace = input.includeMarketplace ?? true;
+  const offersByVariant: Record<string, OfferQuote[]> = {};
+  for (const item of input.items) {
+    const category = variantById.get(item.variantId)!.products.category_slug;
+    offersByVariant[item.variantId] = rankQuotes(
+      offerRows
+        .filter((o) => o.variantId === item.variantId)
+        .map((o) => quoteOffer(o, category, ctx)),
+      { includeMarketplace },
+    );
+  }
+
   return {
     regionCode: region.code,
     currency,
+    offersByVariant,
     compatibility: evaluateBuild(components, { rules: ruleConfigs, useCase: input.useCase }),
     price: priceBuild(
       input.items.map((item) => ({
@@ -191,7 +214,7 @@ export async function evaluateBuildForRegion(
       })),
       offerRows,
       ctx,
-      { includeMarketplace: input.includeMarketplace ?? true },
+      { includeMarketplace },
     ),
   };
 }
