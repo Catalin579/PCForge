@@ -22,7 +22,9 @@ describe("builder store", () => {
     add();
     add();
     add();
-    expect(useBuilder.getState().items).toEqual([expect.objectContaining({ variantId: "s1", quantity: 3 })]);
+    expect(useBuilder.getState().items).toEqual([
+      expect.objectContaining({ variantId: "s1", quantity: 3 }),
+    ]);
   });
 
   it("sets quantity, removes at zero, selects offers and clears", () => {
@@ -37,6 +39,10 @@ describe("builder store", () => {
 
   it("loads a saved build", () => {
     useBuilder.getState().load([{ ...cpu, quantity: 1 }], { buildId: "b1", buildName: "Mine" });
-    expect(useBuilder.getState()).toMatchObject({ buildId: "b1", buildName: "Mine", items: [{ variantId: "c1" }] });
+    expect(useBuilder.getState()).toMatchObject({
+      buildId: "b1",
+      buildName: "Mine",
+      items: [{ variantId: "c1" }],
+    });
   });
 });

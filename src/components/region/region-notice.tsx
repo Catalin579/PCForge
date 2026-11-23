@@ -38,11 +38,23 @@ export function RegionNotice() {
           {regions
             .filter((r) => r.code !== regionCode)
             .map((r) => (
-              <Button key={r.code} size="sm" variant="outline" onClick={() => confirm(r.code)} disabled={pending}>
+              <Button
+                key={r.code}
+                size="sm"
+                variant="outline"
+                onClick={() => confirm(r.code)}
+                disabled={pending}
+              >
                 Switch to {r.name}
               </Button>
             ))}
-          <Button size="icon" variant="ghost" className="size-8" onClick={() => setHidden(true)} aria-label="Dismiss">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            onClick={() => setHidden(true)}
+            aria-label="Dismiss"
+          >
             <X className="size-4" aria-hidden />
           </Button>
         </div>

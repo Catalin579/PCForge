@@ -12,7 +12,8 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string; error?: string }>;
 }) {
   const { next, error } = await searchParams;
-  if (await getCurrentUser()) redirect(next && next.startsWith("/") && !next.startsWith("//") ? next : "/builds");
+  if (await getCurrentUser())
+    redirect(next && next.startsWith("/") && !next.startsWith("//") ? next : "/builds");
   return (
     <div className="mx-auto max-w-sm px-4 py-12 sm:py-16">
       <AuthForm next={next} initialError={error?.slice(0, 200)} />

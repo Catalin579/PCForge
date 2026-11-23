@@ -20,7 +20,10 @@ const schema = z.object({
 export type SetRegionResult = { ok: true } | { ok: false; error: string };
 
 /** Save the user's market choice in cookies (and their profile when signed in). */
-export async function setRegion(input: { region: string; currency?: string }): Promise<SetRegionResult> {
+export async function setRegion(input: {
+  region: string;
+  currency?: string;
+}): Promise<SetRegionResult> {
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid region." };
 

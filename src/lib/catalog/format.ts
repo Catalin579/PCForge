@@ -7,7 +7,8 @@ import { type CategorySlug } from "./specs";
 type Specs = Record<string, unknown>;
 type Row = { label: string; value: string };
 
-const num = (v: unknown, unit = "") => (typeof v === "number" ? `${v.toLocaleString("en")}${unit}` : null);
+const num = (v: unknown, unit = "") =>
+  typeof v === "number" ? `${v.toLocaleString("en")}${unit}` : null;
 const bool = (v: unknown) => (typeof v === "boolean" ? (v ? "Yes" : "No") : null);
 const list = (v: unknown) => (Array.isArray(v) ? v.join(", ") : null);
 const str = (v: unknown) => (typeof v === "string" ? v : null);
@@ -22,10 +23,20 @@ const ROWS: Record<CategorySlug, Array<[string, (s: Specs) => string | null]>> =
     ["Socket", (s) => str(s.socket)],
     ["Architecture", (s) => str(s.architecture)],
     ["Cores / threads", (s) => (s.cores && s.threads ? `${s.cores} / ${s.threads}` : null)],
-    ["Base / boost clock", (s) => (s.baseClockGhz && s.boostClockGhz ? `${s.baseClockGhz} / ${s.boostClockGhz} GHz` : null)],
+    [
+      "Base / boost clock",
+      (s) =>
+        s.baseClockGhz && s.boostClockGhz ? `${s.baseClockGhz} / ${s.boostClockGhz} GHz` : null,
+    ],
     ["L3 cache", (s) => num(s.l3CacheMb, " MB")],
     ["TDP / max power", (s) => (s.tdpW && s.maxPowerW ? `${s.tdpW} W / ${s.maxPowerW} W` : null)],
-    ["Memory", (s) => (Array.isArray(s.memoryTypes) ? `${s.memoryTypes.join(", ")} up to ${s.maxMemorySpeedMts} MT/s` : null)],
+    [
+      "Memory",
+      (s) =>
+        Array.isArray(s.memoryTypes)
+          ? `${s.memoryTypes.join(", ")} up to ${s.maxMemorySpeedMts} MT/s`
+          : null,
+    ],
     ["Integrated graphics", (s) => bool(s.integratedGraphics)],
     ["Cooler included", (s) => bool(s.coolerIncluded)],
     ["PCIe", (s) => str(s.pcieVersion)],
@@ -34,12 +45,30 @@ const ROWS: Record<CategorySlug, Array<[string, (s: Specs) => string | null]>> =
     ["Socket", (s) => str(s.socket)],
     ["Chipset", (s) => str(s.chipset)],
     ["Form factor", (s) => str(s.formFactor)],
-    ["Memory", (s) => (s.memoryType ? `${s.memoryType}, ${s.memorySlots} slots, up to ${s.maxMemoryGb} GB at ${s.maxMemorySpeedMts} MT/s` : null)],
-    ["M.2 slots", (s) => (Array.isArray(s.m2Slots) ? `${s.m2Slots.length} (${(s.m2Slots as Array<{ interface: string }>).map((m) => m.interface.replace(" x4", "")).join(", ")})` : null)],
+    [
+      "Memory",
+      (s) =>
+        s.memoryType
+          ? `${s.memoryType}, ${s.memorySlots} slots, up to ${s.maxMemoryGb} GB at ${s.maxMemorySpeedMts} MT/s`
+          : null,
+    ],
+    [
+      "M.2 slots",
+      (s) =>
+        Array.isArray(s.m2Slots)
+          ? `${s.m2Slots.length} (${(s.m2Slots as Array<{ interface: string }>).map((m) => m.interface.replace(" x4", "")).join(", ")})`
+          : null,
+    ],
     ["SATA ports", (s) => num(s.sataPorts)],
     ["PCIe x16 slots", (s) => num(s.pcieX16Slots)],
     ["CPU power", (s) => num(s.epsConnectors, " x 8-pin EPS")],
-    ["Wi-Fi / Bluetooth", (s) => (typeof s.wifi === "boolean" ? `${s.wifi ? "Yes" : "No"} / ${s.bluetooth ? "Yes" : "No"}` : null)],
+    [
+      "Wi-Fi / Bluetooth",
+      (s) =>
+        typeof s.wifi === "boolean"
+          ? `${s.wifi ? "Yes" : "No"} / ${s.bluetooth ? "Yes" : "No"}`
+          : null,
+    ],
   ],
   memory: [
     ["Type", (s) => str(s.type)],
@@ -58,7 +87,15 @@ const ROWS: Record<CategorySlug, Array<[string, (s: Specs) => string | null]>> =
     ["Slot width", (s) => num(s.slotWidth, " slots")],
     ["Board power", (s) => num(s.boardPowerW, " W")],
     ["Recommended PSU", (s) => num(s.recommendedPsuW, " W")],
-    ["Power connectors", (s) => (Array.isArray(s.powerConnectors) ? (s.powerConnectors as Array<{ type: string; count: number }>).map((c) => `${c.count} x ${c.type}`).join(", ") || "None" : null)],
+    [
+      "Power connectors",
+      (s) =>
+        Array.isArray(s.powerConnectors)
+          ? (s.powerConnectors as Array<{ type: string; count: number }>)
+              .map((c) => `${c.count} x ${c.type}`)
+              .join(", ") || "None"
+          : null,
+    ],
     ["Interface", (s) => str(s.pcieInterface)],
     ["Outputs", (s) => list(s.outputs)],
   ],
@@ -79,24 +116,44 @@ const ROWS: Record<CategorySlug, Array<[string, (s: Specs) => string | null]>> =
     ["Form factor", (s) => str(s.formFactor)],
     ["ATX version", (s) => str(s.atxVersion)],
     ["Length", (s) => num(s.lengthMm, " mm")],
-    ["Connectors", (s) => {
-      const c = s.connectors as Record<string, number> | undefined;
-      return c ? `${c.eps8pin} x EPS 8-pin, ${c.pcie8pin} x PCIe 8-pin, ${c["12v2x6"]} x 12V-2x6, ${c.sata} x SATA` : null;
-    }],
+    [
+      "Connectors",
+      (s) => {
+        const c = s.connectors as Record<string, number> | undefined;
+        return c
+          ? `${c.eps8pin} x EPS 8-pin, ${c.pcie8pin} x PCIe 8-pin, ${c["12v2x6"]} x 12V-2x6, ${c.sata} x SATA`
+          : null;
+      },
+    ],
   ],
   case: [
     ["Type", (s) => str(s.type)],
     ["Motherboards", (s) => list(s.supportedMotherboards)],
     ["Max GPU length", (s) => num(s.maxGpuLengthMm, " mm")],
     ["Max cooler height", (s) => num(s.maxCpuCoolerHeightMm, " mm")],
-    ["PSU", (s) => (Array.isArray(s.psuFormFactors) ? `${s.psuFormFactors.join(", ")} up to ${s.maxPsuLengthMm} mm` : null)],
-    ["Radiators", (s) => {
-      const r = s.radiatorSupport as Record<string, number[]> | undefined;
-      if (!r) return null;
-      const parts = Object.entries(r).filter(([, v]) => v.length).map(([k, v]) => `${k} ${v.join("/")}`);
-      return parts.length ? parts.join("; ") + " mm" : "None";
-    }],
-    ["Drive bays", (s) => (s.driveBays25 !== undefined ? `${s.driveBays25} x 2.5", ${s.driveBays35} x 3.5"` : null)],
+    [
+      "PSU",
+      (s) =>
+        Array.isArray(s.psuFormFactors)
+          ? `${s.psuFormFactors.join(", ")} up to ${s.maxPsuLengthMm} mm`
+          : null,
+    ],
+    [
+      "Radiators",
+      (s) => {
+        const r = s.radiatorSupport as Record<string, number[]> | undefined;
+        if (!r) return null;
+        const parts = Object.entries(r)
+          .filter(([, v]) => v.length)
+          .map(([k, v]) => `${k} ${v.join("/")}`);
+        return parts.length ? parts.join("; ") + " mm" : "None";
+      },
+    ],
+    [
+      "Drive bays",
+      (s) =>
+        s.driveBays25 !== undefined ? `${s.driveBays25} x 2.5", ${s.driveBays35} x 3.5"` : null,
+    ],
     ["Included fans", (s) => num(s.includedFans)],
     ["Side panel", (s) => str(s.sidePanel)],
   ],
@@ -177,7 +234,9 @@ export function specSummary(category: CategorySlug, specs: Specs): string {
   };
   const wanted = keys[category];
   const rows = specRows(category, specs);
-  return (wanted ? rows.filter((r) => wanted.includes(r.label)) : rows.slice(0, 3)).map((r) => r.value).join(" · ");
+  return (wanted ? rows.filter((r) => wanted.includes(r.label)) : rows.slice(0, 3))
+    .map((r) => r.value)
+    .join(" · ");
 }
 
 export const STOCK_LABELS: Record<string, string> = {

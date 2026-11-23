@@ -13,7 +13,9 @@ export const getActiveRegions = cache(async (): Promise<RegionOption[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("regions")
-    .select("code, name, default_currency, default_locale, sort_order, region_currencies(currency_code)")
+    .select(
+      "code, name, default_currency, default_locale, sort_order, region_currencies(currency_code)",
+    )
     .eq("is_active", true)
     .order("sort_order");
   if (error) throw new Error(`Could not load regions: ${error.message}`);

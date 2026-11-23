@@ -39,8 +39,18 @@ export function RegionSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5" aria-label={`Market: ${current?.name ?? regionCode}, ${currency}. Change`} data-testid="region-switcher">
-          {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <span aria-hidden>{flagEmoji(regionCode)}</span>}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5"
+          aria-label={`Market: ${current?.name ?? regionCode}, ${currency}. Change`}
+          data-testid="region-switcher"
+        >
+          {pending ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+          ) : (
+            <span aria-hidden>{flagEmoji(regionCode)}</span>
+          )}
           <span className="font-medium">{regionCode}</span>
           <span className="text-muted-foreground">· {currency}</span>
         </Button>

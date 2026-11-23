@@ -28,7 +28,10 @@ export async function POST(request: NextRequest) {
   }
   const parsed = bodySchema.safeParse(json);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid build.", issues: parsed.error.issues }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid build.", issues: parsed.error.issues },
+      { status: 400 },
+    );
   }
 
   try {
@@ -45,6 +48,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: err.message, code: err.code }, { status: 422 });
     }
     console.error("Build evaluation failed", err);
-    return NextResponse.json({ error: "Could not evaluate the build. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Could not evaluate the build. Please try again." },
+      { status: 500 },
+    );
   }
 }

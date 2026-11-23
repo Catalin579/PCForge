@@ -19,12 +19,23 @@ type Props = {
   className?: string;
 };
 
-export function AddToBuildButton({ variantId, productSlug, name, category, categoryName, maxPerBuild, size = "sm", className }: Props) {
+export function AddToBuildButton({
+  variantId,
+  productSlug,
+  name,
+  category,
+  categoryName,
+  maxPerBuild,
+  size = "sm",
+  className,
+}: Props) {
   const hydrated = useBuilderHydrated();
   const add = useBuilder((s) => s.add);
   const inBuild = useBuilder((s) => s.items.find((i) => i.variantId === variantId));
   const replacing = useBuilder((s) =>
-    maxPerBuild === 1 ? s.items.find((i) => i.category === category && i.variantId !== variantId) : undefined,
+    maxPerBuild === 1
+      ? s.items.find((i) => i.category === category && i.variantId !== variantId)
+      : undefined,
   );
   const single = maxPerBuild === 1;
 
@@ -46,7 +57,12 @@ export function AddToBuildButton({ variantId, productSlug, name, category, categ
     );
   }
   return (
-    <Button size={size} onClick={onClick} className={className} aria-label={`Add ${name} to build as ${categoryName}`}>
+    <Button
+      size={size}
+      onClick={onClick}
+      className={className}
+      aria-label={`Add ${name} to build as ${categoryName}`}
+    >
       <Plus className="size-4" aria-hidden />
       {hydrated && inBuild ? `Add another (${inBuild.quantity})` : "Add to build"}
     </Button>

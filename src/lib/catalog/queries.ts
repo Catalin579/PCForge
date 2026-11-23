@@ -58,44 +58,62 @@ export const getCategories = cache(async (): Promise<Category[]> => {
     }));
 });
 
-export const getCategory = cache(async (slug: string) => (await getCategories()).find((c) => c.slug === slug) ?? null);
+export const getCategory = cache(
+  async (slug: string) => (await getCategories()).find((c) => c.slug === slug) ?? null,
+);
 
 /** Everything the pricing service needs for one region, loaded once per request. */
-export const getPricingContext = cache(async (regionCode: string, currency: string): Promise<PricingContext> => {
-  const supabase = await createClient();
-  const [rates, taxes, retailerRegions] = await Promise.all([
-    supabase.from("exchange_rates").select("base_currency, quote_currency, rate, valid_at"),
-    supabase.from("tax_rules").select("region_code, category_slug, rate, valid_from, valid_to").eq("region_code", regionCode),
-    supabase.from("retailer_regions").select("*").eq("region_code", regionCode),
-  ]);
-  for (const r of [rates, taxes, retailerRegions]) if (r.error) throw new CatalogError(r.error.message);
-  return {
-    regionCode,
-    displayCurrency: currency,
-    at: new Date(),
-    rates: (rates.data ?? []).map(toRate),
-    taxRules: (taxes.data ?? []).map((t) => ({
-      regionCode: t.region_code,
-      categorySlug: t.category_slug,
-      rate: Number(t.rate),
-      validFrom: t.valid_from,
-      validTo: t.valid_to,
-    })),
-    retailerRegions: (retailerRegions.data ?? []).map((r) => ({
-      retailerId: r.retailer_id,
-      regionCode: r.region_code,
-      currencyCode: r.currency_code,
-      shippingCost: r.shipping_cost,
-      freeShippingOver: r.free_shipping_over,
-      deliveryDaysMin: r.delivery_days_min,
-      deliveryDaysMax: r.delivery_days_max,
-      isActive: r.is_active,
-    })),
-  };
-});
+export const getPricingContext = cache(
+  async (regionCode: string, currency: string): Promise<PricingContext> => {
+    const supabase = await createClient();
+    const [rates, taxes, retailerRegions] = await Promise.all([
+      supabase.from("exchange_rates").select("base_currency, quote_currency, rate, valid_at"),
+      supabase
+        .from("tax_rules")
+        .select("region_code, category_slug, rate, valid_from, valid_to")
+        .eq("region_code", regionCode),
+      supabase.from("retailer_regions").select("*").eq("region_code", regionCode),
+    ]);
+    for (const r of [rates, taxes, retailerRegions])
+      if (r.error) throw new CatalogError(r.error.message);
+    return {
+      regionCode,
+      displayCurrency: currency,
+      at: new Date(),
+      rates: (rates.data ?? []).map(toRate),
+      taxRules: (taxes.data ?? []).map((t) => ({
+        regionCode: t.region_code,
+        categorySlug: t.category_slug,
+        rate: Number(t.rate),
+        validFrom: t.valid_from,
+        validTo: t.valid_to,
+      })),
+      retailerRegions: (retailerRegions.data ?? []).map((r) => ({
+        retailerId: r.retailer_id,
+        regionCode: r.region_code,
+        currencyCode: r.currency_code,
+        shippingCost: r.shipping_cost,
+        freeShippingOver: r.free_shipping_over,
+        deliveryDaysMin: r.delivery_days_min,
+        deliveryDaysMax: r.delivery_days_max,
+        isActive: r.is_active,
+      })),
+    };
+  },
+);
 
-function toRate(r: { base_currency: string; quote_currency: string; rate: number; valid_at: string }): ExchangeRate {
-  return { base: r.base_currency, quote: r.quote_currency, rate: Number(r.rate), validAt: r.valid_at };
+function toRate(r: {
+  base_currency: string;
+  quote_currency: string;
+  rate: number;
+  valid_at: string;
+}): ExchangeRate {
+  return {
+    base: r.base_currency,
+    quote: r.quote_currency,
+    rate: Number(r.rate),
+    validAt: r.valid_at,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -165,25 +183,27 @@ export async function searchProducts(
   const rows = data ?? [];
   const total = Number(rows[0]?.total_count ?? 0);
   return {
-    items: rows.filter((r) => isCategorySlug(r.category_slug)).map((r) => ({
-      id: r.id,
-      slug: r.slug,
-      name: r.name,
-      category: r.category_slug as CategorySlug,
-      brandName: r.brand_name,
-      imageUrl: r.image_urls?.[0] ?? null,
-      specs: (r.specs ?? {}) as Record<string, unknown>,
-      performanceScore: r.performance_score,
-      defaultVariantId: r.default_variant_id,
-      fromPrice:
-        r.min_price === null || r.currency_code === null
-          ? null
-          : convert(money(r.min_price, r.currency_code), region.currency, ctx.rates, ctx.at),
-      offerCount: r.offer_count,
-      inStockCount: r.in_stock_count,
-      averageRating: r.average_rating === null ? null : Number(r.average_rating),
-      reviewCount: r.review_count,
-    })),
+    items: rows
+      .filter((r) => isCategorySlug(r.category_slug))
+      .map((r) => ({
+        id: r.id,
+        slug: r.slug,
+        name: r.name,
+        category: r.category_slug as CategorySlug,
+        brandName: r.brand_name,
+        imageUrl: r.image_urls?.[0] ?? null,
+        specs: (r.specs ?? {}) as Record<string, unknown>,
+        performanceScore: r.performance_score,
+        defaultVariantId: r.default_variant_id,
+        fromPrice:
+          r.min_price === null || r.currency_code === null
+            ? null
+            : convert(money(r.min_price, r.currency_code), region.currency, ctx.rates, ctx.at),
+        offerCount: r.offer_count,
+        inStockCount: r.in_stock_count,
+        averageRating: r.average_rating === null ? null : Number(r.average_rating),
+        reviewCount: r.review_count,
+      })),
     total,
     page,
     pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)),
@@ -231,7 +251,14 @@ export type ProductDetail = {
   powerDrawW: number | null;
   performanceScore: number | null;
   releaseDate: string | null;
-  variants: Array<{ id: string; sku: string; mpn: string | null; label: string | null; isDefault: boolean; specs: Record<string, unknown> }>;
+  variants: Array<{
+    id: string;
+    sku: string;
+    mpn: string | null;
+    label: string | null;
+    isDefault: boolean;
+    specs: Record<string, unknown>;
+  }>;
   rating: { average: number | null; count: number };
 };
 
@@ -342,7 +369,12 @@ export async function getPriceHistory(
   const byDay = new Map<string, number>();
   for (const p of data ?? []) {
     const day = p.recorded_at.slice(0, 10);
-    const amount = convert(money(p.price, p.currency_code), region.currency, ctx.rates, ctx.at).amount;
+    const amount = convert(
+      money(p.price, p.currency_code),
+      region.currency,
+      ctx.rates,
+      ctx.at,
+    ).amount;
     byDay.set(day, Math.min(byDay.get(day) ?? Infinity, amount));
   }
   return [...byDay.entries()]
@@ -364,7 +396,11 @@ export async function getAlternatives(product: ProductDetail, region: ResolvedRe
   const score = product.performanceScore ?? 50;
   return (data ?? [])
     .filter((r) => r.id !== product.id && r.offer_count > 0)
-    .sort((a, b) => Math.abs((a.performance_score ?? 50) - score) - Math.abs((b.performance_score ?? 50) - score))
+    .sort(
+      (a, b) =>
+        Math.abs((a.performance_score ?? 50) - score) -
+        Math.abs((b.performance_score ?? 50) - score),
+    )
     .slice(0, limit)
     .map((r) => ({
       slug: r.slug,

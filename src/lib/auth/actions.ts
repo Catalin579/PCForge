@@ -7,7 +7,11 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 
-export type AuthFormState = { error?: string; message?: string; fieldErrors?: Record<string, string> } | null;
+export type AuthFormState = {
+  error?: string;
+  message?: string;
+  fieldErrors?: Record<string, string>;
+} | null;
 
 const credentialsSchema = z.object({
   email: z.email("Enter a valid email address."),
@@ -24,7 +28,9 @@ async function origin(): Promise<string> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? "http";
-  return host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000");
+  return host
+    ? `${proto}://${host}`
+    : (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000");
 }
 
 function fieldErrors(error: z.ZodError): Record<string, string> {
@@ -33,7 +39,10 @@ function fieldErrors(error: z.ZodError): Record<string, string> {
   return out;
 }
 
-export async function signInWithPassword(_: AuthFormState, formData: FormData): Promise<AuthFormState> {
+export async function signInWithPassword(
+  _: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
   const parsed = credentialsSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
 
@@ -42,13 +51,20 @@ export async function signInWithPassword(_: AuthFormState, formData: FormData): 
     email: parsed.data.email,
     password: parsed.data.password,
   });
-  if (error) return { error: error.message === "Invalid login credentials" ? "Wrong email or password." : error.message };
+  if (error)
+    return {
+      error:
+        error.message === "Invalid login credentials" ? "Wrong email or password." : error.message,
+    };
 
   revalidatePath("/", "layout");
   redirect(safeNext(parsed.data.next));
 }
 
-export async function signUpWithPassword(_: AuthFormState, formData: FormData): Promise<AuthFormState> {
+export async function signUpWithPassword(
+  _: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
   const parsed = credentialsSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
 
@@ -57,7 +73,9 @@ export async function signUpWithPassword(_: AuthFormState, formData: FormData): 
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: { emailRedirectTo: `${await origin()}/auth/callback?next=${encodeURIComponent(next)}` },
+    options: {
+      emailRedirectTo: `${await origin()}/auth/callback?next=${encodeURIComponent(next)}`,
+    },
   });
   if (error) return { error: error.message };
 

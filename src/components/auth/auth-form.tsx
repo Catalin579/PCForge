@@ -27,9 +27,13 @@ export function AuthForm({ next, initialError }: { next?: string; initialError?:
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{mode === "signin" ? "Sign in" : "Create an account"}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {mode === "signin" ? "Sign in" : "Create an account"}
+        </h1>
         <p className="text-muted-foreground text-sm">
-          {mode === "signin" ? "Save builds, share them and pick up where you left off." : "It takes a few seconds."}
+          {mode === "signin"
+            ? "Save builds, share them and pick up where you left off."
+            : "It takes a few seconds."}
         </p>
       </div>
 
@@ -48,13 +52,19 @@ export function AuthForm({ next, initialError }: { next?: string; initialError?:
         <input type="hidden" name="next" value={next ?? ""} />
         <Button type="submit" name="provider" value="google" variant="outline">
           <svg viewBox="0 0 24 24" className="size-4" aria-hidden>
-            <path fill="currentColor" d="M21.35 11.1H12v2.98h5.35c-.23 1.4-1.66 4.1-5.35 4.1a5.95 5.95 0 1 1 0-11.9c1.85 0 3.1.79 3.8 1.47l2.6-2.5C16.76 3.7 14.6 2.7 12 2.7a9.3 9.3 0 1 0 0 18.6c5.37 0 8.93-3.77 8.93-9.09 0-.61-.07-1.08-.16-1.55Z" />
+            <path
+              fill="currentColor"
+              d="M21.35 11.1H12v2.98h5.35c-.23 1.4-1.66 4.1-5.35 4.1a5.95 5.95 0 1 1 0-11.9c1.85 0 3.1.79 3.8 1.47l2.6-2.5C16.76 3.7 14.6 2.7 12 2.7a9.3 9.3 0 1 0 0 18.6c5.37 0 8.93-3.77 8.93-9.09 0-.61-.07-1.08-.16-1.55Z"
+            />
           </svg>
           Google
         </Button>
         <Button type="submit" name="provider" value="github" variant="outline">
           <svg viewBox="0 0 24 24" className="size-4" aria-hidden>
-            <path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" />
+            <path
+              fill="currentColor"
+              d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"
+            />
           </svg>
           GitHub
         </Button>

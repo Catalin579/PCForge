@@ -28,13 +28,21 @@ export default async function CatalogPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Component catalog</h1>
-          <p className="text-muted-foreground mt-1">Prices and stock for {region.region.name}, in {region.currency}.</p>
+          <p className="text-muted-foreground mt-1">
+            Prices and stock for {region.region.name}, in {region.currency}.
+          </p>
         </div>
         <form role="search" action="/catalog" className="flex w-full gap-2 sm:w-96">
           <label htmlFor="catalog-search" className="sr-only">
             Search all components
           </label>
-          <Input id="catalog-search" name="q" type="search" placeholder="Search, e.g. 7800X3D or RTX 5070" defaultValue={params.q} />
+          <Input
+            id="catalog-search"
+            name="q"
+            type="search"
+            placeholder="Search, e.g. 7800X3D or RTX 5070"
+            defaultValue={params.q}
+          />
           <Button type="submit">Search</Button>
         </form>
       </div>
@@ -52,7 +60,11 @@ export default async function CatalogPage({
             <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {results.items.map((p) => (
                 <li key={p.id}>
-                  <ProductCard product={p} category={bySlug.get(p.category)!} locale={region.locale} />
+                  <ProductCard
+                    product={p}
+                    category={bySlug.get(p.category)!}
+                    locale={region.locale}
+                  />
                 </li>
               ))}
             </ul>
@@ -67,7 +79,10 @@ export default async function CatalogPage({
         <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {categories.map((c) => (
             <li key={c.slug}>
-              <Link href={`/catalog/${c.slug}`} className="block h-full rounded-xl focus-visible:outline-2">
+              <Link
+                href={`/catalog/${c.slug}`}
+                className="block h-full rounded-xl focus-visible:outline-2"
+              >
                 <Card className="hover:bg-accent/50 h-full transition-colors">
                   <CardHeader>
                     <CategoryIcon name={c.icon} className="text-primary size-6" />

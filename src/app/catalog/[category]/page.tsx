@@ -8,7 +8,12 @@ import { ProductCard } from "@/components/catalog/product-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { parseCatalogParams, SORT_OPTIONS, SPEC_FILTERS, type CatalogParams } from "@/lib/catalog/filters";
+import {
+  parseCatalogParams,
+  SORT_OPTIONS,
+  SPEC_FILTERS,
+  type CatalogParams,
+} from "@/lib/catalog/filters";
 import {
   getBrandsForCategory,
   getCategory,
@@ -31,7 +36,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 const selectClass =
   "border-input bg-background focus-visible:ring-ring/50 h-9 w-full rounded-md border px-3 text-sm shadow-xs focus-visible:ring-[3px] focus-visible:outline-none";
 
-function hrefWith(category: string, raw: Record<string, string | string[] | undefined>, changes: Record<string, string | null>) {
+function hrefWith(
+  category: string,
+  raw: Record<string, string | string[] | undefined>,
+  changes: Record<string, string | null>,
+) {
   const params = new URLSearchParams();
   for (const [k, v] of Object.entries(raw)) {
     if (v === undefined) continue;
@@ -45,19 +54,29 @@ function hrefWith(category: string, raw: Record<string, string | string[] | unde
   return `/catalog/${category}${qs ? `?${qs}` : ""}`;
 }
 
-function activeFilters(category: CategorySlug, params: CatalogParams, brands: Array<{ slug: string; name: string }>) {
+function activeFilters(
+  category: CategorySlug,
+  params: CatalogParams,
+  brands: Array<{ slug: string; name: string }>,
+) {
   const chips: Array<{ label: string; param: string }> = [];
   if (params.q) chips.push({ label: `“${params.q}”`, param: "q" });
-  for (const b of params.brand) chips.push({ label: brands.find((x) => x.slug === b)?.name ?? b, param: "brand" });
-  if (params.minPrice !== undefined) chips.push({ label: `From ${params.minPrice}`, param: "minPrice" });
-  if (params.maxPrice !== undefined) chips.push({ label: `Up to ${params.maxPrice}`, param: "maxPrice" });
+  for (const b of params.brand)
+    chips.push({ label: brands.find((x) => x.slug === b)?.name ?? b, param: "brand" });
+  if (params.minPrice !== undefined)
+    chips.push({ label: `From ${params.minPrice}`, param: "minPrice" });
+  if (params.maxPrice !== undefined)
+    chips.push({ label: `Up to ${params.maxPrice}`, param: "maxPrice" });
   if (params.inStock) chips.push({ label: "In stock", param: "inStock" });
   if (params.retailer) chips.push({ label: `Retailer: ${params.retailer}`, param: "retailer" });
   for (const f of SPEC_FILTERS[category] ?? []) {
     const v = params.specFilters[f.param];
     if (!v) continue;
     chips.push({
-      label: f.kind === "boolean" ? f.label : `${f.label}: ${v.join(" or ")}${f.unit ? ` ${f.unit}` : ""}`,
+      label:
+        f.kind === "boolean"
+          ? f.label
+          : `${f.label}: ${v.join(" or ")}${f.unit ? ` ${f.unit}` : ""}`,
       param: f.param,
     });
   }
@@ -77,24 +96,54 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     getRetailersForRegion(region.region.code),
   ]);
   const chips = activeFilters(category.slug, parsed, brands);
-  const specFilters = (SPEC_FILTERS[category.slug] ?? []).filter((f) => f.visible || parsed.specFilters[f.param]);
+  const specFilters = (SPEC_FILTERS[category.slug] ?? []).filter(
+    (f) => f.visible || parsed.specFilters[f.param],
+  );
 
   const filterForm = (
     <form action={`/catalog/${category.slug}`} className="space-y-6" aria-label="Filters">
       <div className="space-y-2">
         <Label htmlFor="q">Search</Label>
-        <Input id="q" name="q" type="search" defaultValue={parsed.q} placeholder={`Search ${category.pluralName.toLowerCase()}`} />
+        <Input
+          id="q"
+          name="q"
+          type="search"
+          defaultValue={parsed.q}
+          placeholder={`Search ${category.pluralName.toLowerCase()}`}
+        />
       </div>
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">Price ({region.currency})</legend>
         <div className="flex items-center gap-2">
-          <Input name="minPrice" type="number" inputMode="decimal" min={0} placeholder="Min" defaultValue={parsed.minPrice} aria-label="Minimum price" />
+          <Input
+            name="minPrice"
+            type="number"
+            inputMode="decimal"
+            min={0}
+            placeholder="Min"
+            defaultValue={parsed.minPrice}
+            aria-label="Minimum price"
+          />
           <span aria-hidden>–</span>
-          <Input name="maxPrice" type="number" inputMode="decimal" min={0} placeholder="Max" defaultValue={parsed.maxPrice} aria-label="Maximum price" />
+          <Input
+            name="maxPrice"
+            type="number"
+            inputMode="decimal"
+            min={0}
+            placeholder="Max"
+            defaultValue={parsed.maxPrice}
+            aria-label="Maximum price"
+          />
         </div>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="inStock" value="true" defaultChecked={parsed.inStock === "true"} className="accent-primary size-4" />
+          <input
+            type="checkbox"
+            name="inStock"
+            value="true"
+            defaultChecked={parsed.inStock === "true"}
+            className="accent-primary size-4"
+          />
           In stock only
         </label>
       </fieldset>
@@ -104,7 +153,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         if (f.kind === "boolean") {
           return (
             <label key={f.param} className="flex items-center gap-2 text-sm">
-              <input type="checkbox" name={f.param} value="true" defaultChecked={current === "true"} className="accent-primary size-4" />
+              <input
+                type="checkbox"
+                name={f.param}
+                value="true"
+                defaultChecked={current === "true"}
+                className="accent-primary size-4"
+              />
               {f.label}
             </label>
           );
@@ -116,17 +171,31 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                 {f.label}
                 {f.unit ? ` (${f.unit})` : ""}
               </Label>
-              <Input id={`f-${f.param}`} name={f.param} type="number" inputMode="numeric" min={0} defaultValue={current} />
+              <Input
+                id={`f-${f.param}`}
+                name={f.param}
+                type="number"
+                inputMode="numeric"
+                min={0}
+                defaultValue={current}
+              />
             </div>
           );
         }
         return (
           <div key={f.param} className="space-y-2">
             <Label htmlFor={`f-${f.param}`}>{f.label}</Label>
-            <select id={`f-${f.param}`} name={f.param} defaultValue={parsed.specFilters[f.param]?.join(",") ?? ""} className={selectClass}>
+            <select
+              id={`f-${f.param}`}
+              name={f.param}
+              defaultValue={parsed.specFilters[f.param]?.join(",") ?? ""}
+              className={selectClass}
+            >
               <option value="">Any</option>
               {parsed.specFilters[f.param] && parsed.specFilters[f.param]!.length > 1 && (
-                <option value={parsed.specFilters[f.param]!.join(",")}>{parsed.specFilters[f.param]!.join(" or ")}</option>
+                <option value={parsed.specFilters[f.param]!.join(",")}>
+                  {parsed.specFilters[f.param]!.join(" or ")}
+                </option>
               )}
               {f.options?.map((o) => (
                 <option key={String(o)} value={String(o)}>
@@ -144,7 +213,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <legend className="text-sm font-medium">Brand</legend>
           {brands.map((b) => (
             <label key={b.slug} className="flex items-center gap-2 text-sm">
-              <input type="checkbox" name="brand" value={b.slug} defaultChecked={parsed.brand.includes(b.slug)} className="accent-primary size-4" />
+              <input
+                type="checkbox"
+                name="brand"
+                value={b.slug}
+                defaultChecked={parsed.brand.includes(b.slug)}
+                className="accent-primary size-4"
+              />
               <span className="flex-1">{b.name}</span>
               <span className="text-muted-foreground text-xs">{b.count}</span>
             </label>
@@ -154,7 +229,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
       <div className="space-y-2">
         <Label htmlFor="retailer">Retailer</Label>
-        <select id="retailer" name="retailer" defaultValue={parsed.retailer ?? ""} className={selectClass}>
+        <select
+          id="retailer"
+          name="retailer"
+          defaultValue={parsed.retailer ?? ""}
+          className={selectClass}
+        >
           <option value="">Any retailer</option>
           {retailers.map((r) => (
             <option key={r.slug} value={r.slug}>
@@ -193,12 +273,19 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           {Object.entries(raw).flatMap(([k, v]) =>
             k === "sort" || k === "page" || v === undefined
               ? []
-              : (Array.isArray(v) ? v : [v]).map((value, i) => <input key={`${k}-${i}`} type="hidden" name={k} value={value} />),
+              : (Array.isArray(v) ? v : [v]).map((value, i) => (
+                  <input key={`${k}-${i}`} type="hidden" name={k} value={value} />
+                )),
           )}
           <Label htmlFor="sort" className="text-muted-foreground shrink-0 text-sm font-normal">
             Sort by
           </Label>
-          <AutoSubmitSelect id="sort" name="sort" defaultValue={parsed.sort ?? (parsed.q ? "relevance" : "performance")} className={selectClass}>
+          <AutoSubmitSelect
+            id="sort"
+            name="sort"
+            defaultValue={parsed.sort ?? (parsed.q ? "relevance" : "performance")}
+            className={selectClass}
+          >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
@@ -244,8 +331,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
           {results.items.length === 0 ? (
             <div className="mt-10 rounded-xl border border-dashed p-10 text-center">
-              <p className="font-medium">No {category.pluralName.toLowerCase()} match these filters.</p>
-              <p className="text-muted-foreground mt-1 text-sm">Try removing a filter or widening the price range.</p>
+              <p className="font-medium">
+                No {category.pluralName.toLowerCase()} match these filters.
+              </p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Try removing a filter or widening the price range.
+              </p>
               <Button asChild variant="outline" className="mt-4">
                 <Link href={`/catalog/${category.slug}`}>Clear all filters</Link>
               </Button>
@@ -262,7 +353,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
           {results.pageCount > 1 && (
             <nav aria-label="Pagination" className="mt-8 flex items-center justify-center gap-2">
-              <Button asChild variant="outline" size="sm" aria-disabled={results.page <= 1} className={results.page <= 1 ? "pointer-events-none opacity-50" : ""}>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                aria-disabled={results.page <= 1}
+                className={results.page <= 1 ? "pointer-events-none opacity-50" : ""}
+              >
                 <Link href={hrefWith(category.slug, raw, { page: String(results.page - 1) })}>
                   <ChevronLeft className="size-4" aria-hidden /> Previous
                 </Link>
@@ -270,7 +367,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
               <span className="text-muted-foreground text-sm">
                 Page {results.page} of {results.pageCount}
               </span>
-              <Button asChild variant="outline" size="sm" aria-disabled={results.page >= results.pageCount} className={results.page >= results.pageCount ? "pointer-events-none opacity-50" : ""}>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                aria-disabled={results.page >= results.pageCount}
+                className={
+                  results.page >= results.pageCount ? "pointer-events-none opacity-50" : ""
+                }
+              >
                 <Link href={hrefWith(category.slug, raw, { page: String(results.page + 1) })}>
                   Next <ChevronRight className="size-4" aria-hidden />
                 </Link>

@@ -9,7 +9,10 @@ import { evaluateBuildForRegion, type BuildEvaluation } from "./evaluate";
 import { type EvaluateBuildInput } from "./schema";
 
 export type BuildView = BuildEvaluation & {
-  products: Record<string, { name: string; slug: string; category: string; brandName: string; imageUrl: string | null }>;
+  products: Record<
+    string,
+    { name: string; slug: string; category: string; brandName: string; imageUrl: string | null }
+  >;
   retailers: Record<string, { name: string; slug: string }>;
   /** Safe outbound link per offer id. */
   offerLinks: Record<string, string | null>;

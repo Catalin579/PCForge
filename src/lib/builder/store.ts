@@ -25,11 +25,17 @@ export type BuilderState = {
   /** Set when editing a saved build. */
   buildId: string | null;
   buildName: string | null;
-  add: (item: Omit<BuilderItem, "quantity"> & { quantity?: number }, opts: { singlePerBuild: boolean; max?: number | null }) => void;
+  add: (
+    item: Omit<BuilderItem, "quantity"> & { quantity?: number },
+    opts: { singlePerBuild: boolean; max?: number | null },
+  ) => void;
   remove: (variantId: string) => void;
   setQuantity: (variantId: string, quantity: number) => void;
   selectOffer: (variantId: string, offerId: string | null) => void;
-  load: (items: BuilderItem[], meta?: { buildId?: string | null; buildName?: string | null }) => void;
+  load: (
+    items: BuilderItem[],
+    meta?: { buildId?: string | null; buildName?: string | null },
+  ) => void;
   setSaved: (buildId: string, buildName: string) => void;
   clear: () => void;
 };
@@ -46,32 +52,54 @@ export const useBuilder = create<BuilderState>()(
         set((s) => {
           const quantity = item.quantity ?? 1;
           if (singlePerBuild) {
-            return { items: [...s.items.filter((i) => i.category !== item.category), { ...item, quantity: 1 }] };
+            return {
+              items: [
+                ...s.items.filter((i) => i.category !== item.category),
+                { ...item, quantity: 1 },
+              ],
+            };
           }
           const existing = s.items.find((i) => i.variantId === item.variantId);
-          const inCategory = s.items.filter((i) => i.category === item.category).reduce((n, i) => n + i.quantity, 0);
+          const inCategory = s.items
+            .filter((i) => i.category === item.category)
+            .reduce((n, i) => n + i.quantity, 0);
           const room = Math.max(0, (max ?? MAX_QUANTITY) - inCategory);
           if (room === 0) return s;
           if (existing) {
             return {
               items: s.items.map((i) =>
-                i.variantId === item.variantId ? { ...i, quantity: Math.min(MAX_QUANTITY, i.quantity + Math.min(quantity, room)) } : i,
+                i.variantId === item.variantId
+                  ? {
+                      ...i,
+                      quantity: Math.min(MAX_QUANTITY, i.quantity + Math.min(quantity, room)),
+                    }
+                  : i,
               ),
             };
           }
           return { items: [...s.items, { ...item, quantity: Math.min(quantity, room) }] };
         }),
-      remove: (variantId) => set((s) => ({ items: s.items.filter((i) => i.variantId !== variantId) })),
+      remove: (variantId) =>
+        set((s) => ({ items: s.items.filter((i) => i.variantId !== variantId) })),
       setQuantity: (variantId, quantity) =>
         set((s) => ({
           items:
             quantity <= 0
               ? s.items.filter((i) => i.variantId !== variantId)
-              : s.items.map((i) => (i.variantId === variantId ? { ...i, quantity: Math.min(MAX_QUANTITY, quantity) } : i)),
+              : s.items.map((i) =>
+                  i.variantId === variantId
+                    ? { ...i, quantity: Math.min(MAX_QUANTITY, quantity) }
+                    : i,
+                ),
         })),
       selectOffer: (variantId, offerId) =>
-        set((s) => ({ items: s.items.map((i) => (i.variantId === variantId ? { ...i, selectedOfferId: offerId } : i)) })),
-      load: (items, meta) => set({ items, buildId: meta?.buildId ?? null, buildName: meta?.buildName ?? null }),
+        set((s) => ({
+          items: s.items.map((i) =>
+            i.variantId === variantId ? { ...i, selectedOfferId: offerId } : i,
+          ),
+        })),
+      load: (items, meta) =>
+        set({ items, buildId: meta?.buildId ?? null, buildName: meta?.buildName ?? null }),
       setSaved: (buildId, buildName) => set({ buildId, buildName }),
       clear: () => set({ items: [], buildId: null, buildName: null }),
     }),
