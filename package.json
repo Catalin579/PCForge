@@ -18,8 +18,9 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
-    "db:seed": "tsx scripts/seed.ts",
-    "db:verify": "bash scripts/verify-migrations.sh"
+    "db:seed": "tsx scripts/generate-seed.ts --apply",
+    "db:verify": "bash scripts/verify-migrations.sh",
+    "db:seed:generate": "tsx scripts/generate-seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.8",

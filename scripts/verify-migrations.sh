@@ -17,7 +17,7 @@ cleanup() { psql "$ADMIN_URL" -qc "drop database if exists $DB with (force)" >/d
 trap cleanup EXIT
 
 psql "$ADMIN_URL" -qc "create database $DB"
-run() { psql "$TARGET_URL" -v ON_ERROR_STOP=1 -q -f "$1"; }
+run() { psql "$TARGET_URL" -v ON_ERROR_STOP=1 -q -o /dev/null -f "$1"; }
 
 echo "→ Supabase stub"
 run "$ROOT/supabase/tests/supabase_stub.sql"
